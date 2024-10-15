@@ -1,13 +1,99 @@
-package main
+package maiaasad
 
 import (
-	"github.com/charmbracelet/huh"
+	"fmt"
 	"io/fs"
 	"log"
 	"os"
-	"os/signal"
-	"syscall"
+	"path/filepath"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/huh"
 )
+
+type model struct {
+	GotoPath string
+	Menu     *huh.Select[string]
+	index    int
+}
+
+func New() *model {
+	path, err := os.Getwd()
+	if err != nil {
+		log.Fatalln("(-) Error getting working directory: ", err)
+	}
+
+	paths, err := getPaths(path)
+	if err != nil {
+		log.Fatalln("(-) Error getting paths: ", err)
+	}
+
+	var huhOptions []huh.Option[string]
+	for _, file := range paths {
+		var newOption string
+		if file.IsDir() {
+			newOption = "[DIR]  " + file.Name()
+		} else {
+			newOption = "[FILE] " + file.Name()
+		}
+		huhOption := huh.NewOption(newOption, file.Name())
+		huhOptions = append(huhOptions, huhOption)
+	}
+
+	m := model{
+		GotoPath: path,
+		Menu:     huh.NewSelect[string]().Title("Let's navigate").Options(huhOptions...),
+	}
+	return &m
+}
+
+func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		key := msg.String()
+
+		switch key {
+		case "b", "B":
+			parentDir := filepath.Dir(m.GotoPath)
+			m.GotoPath = parentDir
+			return m, nil
+		case "q", "Q", "ctrl+c":
+			return m, tea.Quit
+
+		case "up", "k", "K":
+			if m.Menu != nil {
+			}
+			return m, nil
+		}
+		if m.Menu != nil {
+			menuModel, cmd := m.Menu.Update(msg)
+
+			if menu, ok := menuModel.(*huh.Select[string]); ok {
+				m.Menu = menu
+			}
+			return m, cmd
+		}
+	}
+	return m, nil
+}
+
+func (m model) View() string {
+	fmt.Println("View called:", m.GotoPath)
+	updateFiles(&m)
+
+	m.Menu.Select(m.index)
+
+	return m.Menu.View()
+}
+
+func main() {
+	m := New()
+	program := tea.NewProgram(m)
+	_, err := program.Run()
+	if err != nil {
+		log.Fatalln("(-) Error starting the program: ", err)
+	}
+}
 
 func getPaths(path string) ([]fs.DirEntry, error) {
 	paths, err := os.ReadDir(path)
@@ -18,69 +104,27 @@ func getPaths(path string) ([]fs.DirEntry, error) {
 	return paths, nil
 }
 
-func main() {
+func (m model) Init() tea.Cmd {
+	return nil
+}
 
-	gotoPath, err := os.Getwd()
+func updateFiles(m *model) {
+	paths, err := getPaths(m.GotoPath)
 	if err != nil {
-		log.Fatalln("(-) Error getting working directory", err)
+		log.Fatalln("(-) Error getting paths: ", err)
 	}
 
-	// SIGNALS are syscalls , we create a channel that listen to them
-	// and an event that listens to n or N
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-	/*
-		go func() {
-			for {
-				event := selectMenu.Run()
-				if event.Key == "n" || event.Key == "N" {
-					fmt.Println("Signal Recieved")
-				}
-			}
-
-		}()
-	*/
-	for {
-		select {
-		case <-sigChan:
-
-			//return gotoPath
-
-		default:
-			// TODO ABSOLUTE PATHS
-			paths, err := getPaths(gotoPath)
-
-			var options []string
-			var huhOptions []huh.Option[string]
-
-			// Format and creation of options
-			for _, file := range paths {
-				var name string
-				if file.IsDir() {
-					name = "[DIR]  " + file.Name()
-				} else {
-					name = "[FILE] " + file.Name()
-				}
-				new_option := name
-				options = append(options, new_option)
-				huhOption := huh.NewOption(new_option, file.Name())
-				huhOptions = append(huhOptions, huhOption)
-			}
-
-			form := huh.NewForm(
-				huh.NewGroup(
-					huh.NewSelect[string]().
-						Title("Let's Navigate").
-						Options(
-							huhOptions...,
-						).
-						Value(&gotoPath),
-				),
-			)
-			err = form.Run()
-			if err != nil {
-				log.Fatal(err)
-			}
+	var huhOptions []huh.Option[string]
+	for _, file := range paths {
+		var newOption string
+		if file.IsDir() {
+			newOption = "[DIR]  " + file.Name()
+		} else {
+			newOption = "[FILE] " + file.Name()
 		}
+		huhOption := huh.NewOption(newOption, file.Name())
+		huhOptions = append(huhOptions, huhOption)
 	}
+	m.Menu.Title("")
+	m.Menu.Options(huhOptions...)
 }
