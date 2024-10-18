@@ -2,7 +2,7 @@ package favorites
 
 import (
 	"encoding/json"
-	"errors"
+	"log"
 	"os"
 )
 
@@ -12,60 +12,92 @@ type Favorites struct {
 	Dirs []string `json:"dirs"`
 }
 
-const favRoute = "/home/evildead20/Documents/Projects/GO/navi/favorites/favs.json"
+var favRoute string
 
-func AddFav(new_dir string) error {
-	favorites, err := LoadFavs()
-	if err != nil {
-		return err
+func init() {
+	favRoute = os.Getenv("FAVROUTE")
+	if favRoute == "" {
+		log.Fatal("CONFIG_PATH environment variable not set")
 	}
+}
 
-	// Check if it exists.
-	for _, dir := range favorites.Dirs {
+func AddFav(new_dir string) {
+	index := CheckFav(new_dir)
+	if index == -1 {
+		favorites := LoadFavs()
+		favorites.Dirs = append(favorites.Dirs, new_dir)
+		SaveFavs(favorites)
+	} else {
+		log.Fatalln("Already in favs")
+	}
+}
+
+func RemoveFav(new_dir string) {
+	index := CheckFav(new_dir)
+
+	if index >= 0 {
+		favorites := LoadFavs()
+		favorites.Dirs = append(favorites.Dirs[:index], favorites.Dirs[index+1:]...)
+		SaveFavs(favorites)
+	} else {
+		log.Fatalln("Not in favs")
+	}
+}
+
+func CheckFav(new_dir string) int {
+	favorites := LoadFavs()
+	for index, dir := range favorites.Dirs {
 		if dir == new_dir {
-			return errors.New("(-) Directory already in favorites")
+			return index
 		}
 	}
-
-	favorites.Dirs = append(favorites.Dirs, new_dir)
-	SaveFavs(favorites)
-	return nil
-}
-
-func ChangeDir(index int) (string, error) {
-	dirs, err := ListFavs()
-	if err != nil {
-		return "", err
-	}
-
-	if index >= len(dirs) {
-		return "", errors.New("(-) Error: Index out of bounds.")
-	}
-	newDir := dirs[index]
-	return newDir, nil
-}
-
-func ListFavs() ([]string, error) {
-	list, err := LoadFavs()
-	if err != nil {
-		return list.Dirs, err
-	}
-
-	return list.Dirs, nil
-}
-
-func LoadFavs() (Favorites, error) {
-	var favorites Favorites
-	data, err := os.ReadFile(favRoute)
-	if err != nil {
-		return favorites, err
-	}
-	json.Unmarshal(data, &favorites)
-	return favorites, nil
+	return -1
 }
 
 func SaveFavs(favorites Favorites) {
 	data, _ := json.MarshalIndent(favorites, "", "  ")
 	os.WriteFile(favRoute, data, 0644)
-
 }
+
+func ListFavs() []string {
+	list := LoadFavs()
+	return list.Dirs
+}
+
+func LoadFavs() Favorites {
+	var favorites Favorites
+	data, err := os.ReadFile(favRoute)
+	if err != nil {
+		log.Fatalln("Error loading favs: ", err)
+	}
+	json.Unmarshal(data, &favorites)
+	return favorites
+}
+
+/*
+// Gets Paths and returns length of longest
+func MaxLenPaths(paths []fs.DirEntry) int {
+	if len(paths) == 0 {
+		log.Fatalln("Length of paths == 0")
+	}
+
+	firstPath, err := paths[0].Info()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	maxLenSoFar := firstPath.Size()
+	for _, p := range paths {
+
+		lengthP, err := p.Info()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		if lengthP.Size() > maxLenSoFar {
+			maxLenSoFar = lengthP.Size()
+		}
+	}
+	return int(maxLenSoFar)
+}
+*/
