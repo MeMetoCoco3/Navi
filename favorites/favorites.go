@@ -74,6 +74,17 @@ func LoadFavs() Favorites {
 	return favorites
 }
 
+func WriteOnTmp(content string) {
+	f, err := os.Create("/tmp/GatorPath")
+	if err != nil {
+		panic(err)
+	}
+	_, err = f.Write([]byte(content))
+	if err != nil {
+		panic(err)
+	}
+}
+
 /*
 // Gets Paths and returns length of longest
 func MaxLenPaths(paths []fs.DirEntry) int {

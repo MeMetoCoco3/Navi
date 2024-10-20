@@ -17,7 +17,8 @@ const favsRoute = "./favorites/favs.json"
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add current directory to favourites.",
-	Long: `Keep track of your favourite directories, so you will
+	Long: `Adds the current directory to the favoruites.json file for easy access in the future via 'fv' command.
+  Keep track of your favourite directories, so you will
   be able to open them easly and efficiently`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -40,6 +41,7 @@ var addCmd = &cobra.Command{
 		}
 
 		favorites.AddFav(absDir)
+		fmt.Printf("(+) %s was added to favorites!", absDir)
 	},
 }
 

@@ -1,13 +1,12 @@
 #!/bin/bash
 
+# SHOULD SET FAVROUTE env variable
+
+rm main
+go build main.go
 # Capture the output of the Go program
-go run viws.go >cd
-
-# Pass the captured output to the 'main goto' command
-DIR=$(main goto "$OUTPUT")
-
-# Print and use the output
-echo -e "\n$DIR\n"
-
+main Gator
+OUTPUT=$(</tmp/GatorPath)
 # Change directory based on the output
-cd "$DIR"
+echo "You are at $OUTPUT"
+cd "$OUTPUT"
