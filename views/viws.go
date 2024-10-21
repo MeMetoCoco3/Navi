@@ -42,12 +42,12 @@ type Styles struct {
 */
 func DefaultStyles() *Styles {
 	s := new(Styles)
-	s.BorderColor = lipgloss.Color("#FDCA40")
+	s.BorderColor = lipgloss.Color("#EB9FEF")
 	s.ForegroundColor = lipgloss.Color("234")
 	s.InputField = lipgloss.NewStyle().
 		BorderForeground(s.BorderColor).
 		BorderStyle(lipgloss.ThickBorder()).
-		Padding(2).
+		Padding(1, 2, 1, 2).
 		Margin(1).
 		Foreground(s.ForegroundColor).Align(10, 10).
 		Width(maxWidth).

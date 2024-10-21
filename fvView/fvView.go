@@ -15,7 +15,7 @@ import (
 
 const maxWidth = 50
 const maxLenPaths = 30
-const maxHeight = 30
+const maxHeight = 10
 
 type model struct {
 	Form     *huh.Form
@@ -32,7 +32,7 @@ type Styles struct {
 
 func DefaultStyles() *Styles {
 	s := new(Styles)
-	s.BorderColor = lipgloss.Color("126")
+	s.BorderColor = lipgloss.Color("#EB9FEF")
 	s.InputField = lipgloss.NewStyle().BorderForeground(s.BorderColor).BorderStyle(lipgloss.ThickBorder()).Padding(1).Width(maxWidth).Height(maxHeight)
 	return s
 }
@@ -64,16 +64,6 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 
 			}
-
-			if m.Form != nil {
-				menuModel, cmd := m.Form.Update(msg)
-				if menu, ok := menuModel.(*huh.Form); ok {
-					m.Form = menu
-				}
-
-				return m, cmd
-			}
-
 		}
 		if m.Form != nil {
 			menuModel, cmd := m.Form.Update(msg)

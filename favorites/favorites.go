@@ -17,7 +17,7 @@ var favRoute string
 func init() {
 	favRoute = os.Getenv("FAVROUTE")
 	if favRoute == "" {
-		log.Fatal("CONFIG_PATH environment variable not set")
+		log.Fatal("(-) CONFIG_PATH environment variable not set")
 	}
 }
 
@@ -28,7 +28,7 @@ func AddFav(new_dir string) {
 		favorites.Dirs = append(favorites.Dirs, new_dir)
 		SaveFavs(favorites)
 	} else {
-		log.Fatalln("Already in favs")
+		log.Fatalln("(-) Already in favs")
 	}
 }
 
@@ -40,7 +40,7 @@ func RemoveFav(new_dir string) {
 		favorites.Dirs = append(favorites.Dirs[:index], favorites.Dirs[index+1:]...)
 		SaveFavs(favorites)
 	} else {
-		log.Fatalln("Not in favs")
+		log.Fatalf("(-) Directory '%s' was not in favs", new_dir)
 	}
 }
 
@@ -68,7 +68,7 @@ func LoadFavs() Favorites {
 	var favorites Favorites
 	data, err := os.ReadFile(favRoute)
 	if err != nil {
-		log.Fatalln("Error loading favs: ", err)
+		log.Fatalln("(-) Error loading favs: ", err)
 	}
 	json.Unmarshal(data, &favorites)
 	return favorites

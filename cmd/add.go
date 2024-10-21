@@ -4,9 +4,9 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
 	"github.com/MeMetoCoco3/navi/favorites"
 	"github.com/spf13/cobra"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -29,7 +29,7 @@ var addCmd = &cobra.Command{
 		} else {
 			cwd, err := os.Getwd()
 			if err != nil {
-				fmt.Println("(-) Error getting current directory", err)
+				log.Fatalln("(-) Error getting current directory", err)
 				return
 			}
 			dir = cwd
@@ -37,11 +37,11 @@ var addCmd = &cobra.Command{
 
 		absDir, err := filepath.Abs(dir)
 		if err != nil {
-			fmt.Println("(-) Error getting absolute path:", err)
+			log.Fatalln("(-) Error getting absolute path:", err)
 		}
 
 		favorites.AddFav(absDir)
-		fmt.Printf("(+) %s was added to favorites!", absDir)
+		log.Fatalf("(+) %s was added to favorites!", absDir)
 	},
 }
 

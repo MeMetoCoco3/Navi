@@ -4,24 +4,30 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/MeMetoCoco3/navi/favorites"
 	"github.com/spf13/cobra"
+	"log"
+	"os"
 )
 
 // rvCmd represents the rv command
-var rvCmd = &cobra.Command{
-	Use:   "rv",
+var rmCmd = &cobra.Command{
+	Use:   "rm",
 	Short: "Remove a directory from favorites.",
 	Long:  `If a directory is in favorites, it will remove it. \nIf it is not, it will print a message`,
 	Run: func(cmd *cobra.Command, args []string) {
+		cd, err := os.Getwd()
+		if err != nil {
+			log.Fatalln("(-) Error getting current directory: ", err)
+		}
 
-		fmt.Printf("Rv called!")
+		favorites.RemoveFav(cd)
+		log.Fatalf("(+) Directory '%s' was successfully removed", cd)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(rvCmd)
+	rootCmd.AddCommand(rmCmd)
 
 	// Here you will define your flags and configuration settings.
 
