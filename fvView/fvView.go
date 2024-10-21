@@ -14,7 +14,7 @@ import (
 )
 
 const maxWidth = 50
-const maxLenPaths = 39
+const maxLenPaths = 30
 const maxHeight = 30
 
 type model struct {
@@ -49,12 +49,6 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		key := msg.String()
 		switch key {
 		case "q", "Q", "ctrl+c":
-			// TODO
-			// Probably not needed this update, just return m, tea.QIot
-			form, _ := m.Form.Update(msg)
-			if f, ok := form.(*huh.Form); ok {
-				m.Form = f
-			}
 			return m, tea.Quit
 
 		case "g", "G":
@@ -103,10 +97,11 @@ func UpdateFiles(m *model) error {
 	for _, file := range paths {
 		var fileName string
 
-		if len(file) > maxLenPaths {
+		if len(file) >= maxLenPaths {
 			fileName = string(0x2724) + "   " + "..." + file[len(file)-maxLenPaths:]
 		} else {
-			spaces := strings.Repeat(" ", maxLenPaths-len(file)-1)
+			// Calculate how many spaces to add
+			spaces := strings.Repeat(" ", maxLenPaths-len(file)+6)
 			fileName = string(0x2724) + spaces + file
 		}
 
@@ -146,11 +141,11 @@ func NewModel() model {
 	for _, file := range paths {
 		var fileName string
 
-		if len(file) > maxLenPaths-10 {
-			fileName = string(0x2724) + "   " + "..." + file[len(file)-30:]
+		if len(file) >= maxLenPaths {
+			fileName = string(0x2724) + "   " + "..." + file[len(file)-maxLenPaths:]
 		} else {
 			// Calculate how many spaces to add
-			spaces := strings.Repeat(" ", maxLenPaths-len(file)-3)
+			spaces := strings.Repeat(" ", maxLenPaths-len(file)+6)
 			fileName = string(0x2724) + spaces + file
 		}
 

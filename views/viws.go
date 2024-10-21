@@ -2,6 +2,7 @@ package views
 
 import (
 	"fmt"
+	s "github.com/MeMetoCoco3/navi/selector"
 	"io/fs"
 	"log"
 	"os"
@@ -15,7 +16,7 @@ import (
 
 const maxWidth = 50
 const maxLenPaths = 30
-const maxHeight = 30
+const maxHeight = 10
 
 type model struct {
 	Form     *huh.Form
@@ -23,6 +24,7 @@ type model struct {
 	GotoPath string
 	Style    *Styles
 	Width    int
+	Selector s.Selector[huh.Option[string]]
 }
 
 type Styles struct {
@@ -30,6 +32,12 @@ type Styles struct {
 	InputField  lipgloss.Style
 }
 
+/*
+	type Selector[T any] struct {
+		items []T
+		index int
+	}
+*/
 func DefaultStyles() *Styles {
 	s := new(Styles)
 	s.BorderColor = lipgloss.Color("126")
@@ -105,8 +113,13 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else if len(paths) == 0 {
 				m.Select.Title("Empty Directory")
 			} else {
-				newPath := fmt.Sprintf("%s/%s", m.GotoPath, selectValue)
+				var newPath string
+				if m.GotoPath == "/" {
+					newPath = fmt.Sprintf("%s%s", m.GotoPath, selectValue)
+				} else {
+					newPath = fmt.Sprintf("%s/%s", m.GotoPath, selectValue)
 
+				}
 				newPathStats, err := os.Stat(newPath)
 				if err != nil {
 					log.Fatalln("Error getting path stats: ", err)
@@ -132,6 +145,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.Form != nil {
 			menuModel, cmd := m.Form.Update(msg)
 
+			m.Select.Title(BeautifulCD(m.GotoPath))
 			if menu, ok := menuModel.(*huh.Form); ok {
 				m.Form = menu
 			}
@@ -144,6 +158,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 func (m *model) View() string {
 	UpdateFiles(m)
+
 	return lipgloss.JoinVertical(
 		lipgloss.Center,
 		m.Style.InputField.Render(m.Form.View()),
@@ -165,6 +180,7 @@ func NewModel() model {
 
 	var huhOptions []huh.Option[string]
 	var newOption string
+
 	for _, file := range paths {
 		var fileName string
 
@@ -190,7 +206,7 @@ func NewModel() model {
 	selectComponent := huh.NewSelect[string]().Key("folder").
 		Options(huhOptions...).
 		Title(currentDirectory)
-
+	s := s.NewSelector(huhOptions)
 	return model{
 		// This WithHeight kicked my ass
 		Form:     huh.NewForm(huh.NewGroup(selectComponent).WithHeight(heightSelect)),
@@ -198,6 +214,7 @@ func NewModel() model {
 		GotoPath: path,
 		Style:    style,
 		Width:    maxWidth,
+		Selector: *s,
 	}
 }
 
@@ -249,7 +266,11 @@ func UpdateFiles(m *model) {
 	if huhOptions == nil {
 
 	} else {
+		m.Select.Options()
+
 		m.Select.Options(huhOptions...)
+		m.Form.UpdateFieldPositions()
+		m.Selector.SetIndex(0)
 	}
 
 }
