@@ -25,11 +25,13 @@ type model struct {
 	Style    *Styles
 	Width    int
 	Selector s.Selector[huh.Option[string]]
+	FilterOn bool
 }
 
 type Styles struct {
-	BorderColor lipgloss.Color
-	InputField  lipgloss.Style
+	BorderColor     lipgloss.Color
+	ForegroundColor lipgloss.Color
+	InputField      lipgloss.Style
 }
 
 /*
@@ -40,8 +42,16 @@ type Styles struct {
 */
 func DefaultStyles() *Styles {
 	s := new(Styles)
-	s.BorderColor = lipgloss.Color("126")
-	s.InputField = lipgloss.NewStyle().BorderForeground(s.BorderColor).BorderStyle(lipgloss.ThickBorder()).Padding(1).Width(maxWidth).Height(maxHeight)
+	s.BorderColor = lipgloss.Color("#FDCA40")
+	s.ForegroundColor = lipgloss.Color("234")
+	s.InputField = lipgloss.NewStyle().
+		BorderForeground(s.BorderColor).
+		BorderStyle(lipgloss.ThickBorder()).
+		Padding(2).
+		Margin(1).
+		Foreground(s.ForegroundColor).Align(10, 10).
+		Width(maxWidth).
+		Height(maxHeight)
 	return s
 }
 
@@ -52,6 +62,24 @@ func (m model) Init() tea.Cmd {
 
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
+	/*
+		if m.FilterOn {
+			switch msg := msg.(type) {
+			case tea.KeyMsg:
+				key := msg.String()
+				switch key {
+				case "esc":
+					m.FilterOn = false
+				}
+			}
+			menuModel, cmd := m.Form.Update(msg)
+			if menu, ok := menuModel.(*huh.Form); ok {
+				m.Form = menu
+			}
+
+			return m, cmd
+		}
+	*/
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		key := msg.String()
@@ -62,7 +90,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "g", "G":
 			favorites.WriteOnTmp(m.GotoPath)
 			return m, tea.Quit
-
+			//case "/":
+		//m.FilterOn = true
 		case "b", "B", "left":
 			m.GotoPath = filepath.Dir(m.GotoPath)
 			m.Select.Title(BeautifulCD(m.GotoPath))
@@ -168,12 +197,13 @@ func NewModel() model {
 	s := s.NewSelector(huhOptions)
 	return model{
 		// This WithHeight kicked my ass
-		Form:     huh.NewForm(huh.NewGroup(selectComponent).WithHeight(heightSelect)),
+		Form:     huh.NewForm(huh.NewGroup(selectComponent).WithHeight(heightSelect).WithTheme(huh.ThemeBase16())),
 		Select:   selectComponent,
 		GotoPath: path,
 		Style:    style,
 		Width:    maxWidth,
 		Selector: *s,
+		FilterOn: false,
 	}
 }
 
@@ -250,10 +280,5 @@ func BeautifulCD(path string) string {
 	} else {
 		beautifulDir = path
 	}
-	/*
-		fmt.Println("Path length: ", len(path))
-		fmt.Println("currentDirectory: ", path)
-		fmt.Println("currentDirectory Beautiful: ", beautifulDir)
-	*/
 	return beautifulDir
 }
