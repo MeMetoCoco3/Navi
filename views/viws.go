@@ -57,10 +57,6 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		key := msg.String()
 		switch key {
 		case "q", "Q", "ctrl+c":
-			form, _ := m.Form.Update(msg)
-			if f, ok := form.(*huh.Form); ok {
-				m.Form = f
-			}
 			return m, tea.Quit
 
 		case "g", "G":
@@ -68,46 +64,14 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case "b", "B", "left":
-			parentDir := filepath.Dir(m.GotoPath)
-			m.GotoPath = parentDir
+			m.GotoPath = filepath.Dir(m.GotoPath)
 			m.Select.Title(BeautifulCD(m.GotoPath))
-
 			UpdateFiles(m)
-			if m.Form != nil {
-				menuModel, cmd := m.Form.Update(msg)
-				if menu, ok := menuModel.(*huh.Form); ok {
-					m.Form = menu
-				}
-
-				return m, cmd
-			}
-
-		case "a", "A":
-			checker := favorites.CheckFav(m.GotoPath)
-			if checker == -1 {
-				favorites.AddFav(m.GotoPath)
-				m.Select.Title("Directory added.")
-			} else {
-				favorites.RemoveFav(m.GotoPath)
-				m.Select.Title("Directory Removed")
-			}
-			if m.Form != nil {
-				menuModel, cmd := m.Form.Update(msg)
-
-				if menu, ok := menuModel.(*huh.Form); ok {
-					m.Form = menu
-				}
-
-				return m, cmd
-			}
 
 		case "enter", "right":
 			selectValue := m.Select.GetValue()
-			paths, err := GetPaths(fmt.Sprintf("%s/%s", m.GotoPath, selectValue))
-			if err != nil {
-				m.Select.Title("Not a Directory")
-				return m, nil
-			}
+			paths, _ := GetPaths(fmt.Sprintf("%s/%s", m.GotoPath, selectValue))
+
 			if selectValue == "" {
 				m.Select.Title("Not a Directory")
 			} else if len(paths) == 0 {
@@ -120,26 +84,21 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					newPath = fmt.Sprintf("%s/%s", m.GotoPath, selectValue)
 
 				}
-				newPathStats, err := os.Stat(newPath)
-				if err != nil {
-					log.Fatalln("Error getting path stats: ", err)
-				}
-
-				if !newPathStats.IsDir() {
-					return m, nil
-				}
 				m.GotoPath = newPath
 				UpdateFiles(m)
 				m.Select.Title(BeautifulCD(m.GotoPath))
 			}
-			if m.Form != nil {
-				menuModel, cmd := m.Form.Update(msg)
 
-				if menu, ok := menuModel.(*huh.Form); ok {
-					m.Form = menu
-				}
-				return m, cmd
+		case "a", "A":
+			checker := favorites.CheckFav(m.GotoPath)
+			if checker == -1 {
+				favorites.AddFav(m.GotoPath)
+				m.Select.Title("Directory added.")
+			} else {
+				favorites.RemoveFav(m.GotoPath)
+				m.Select.Title("Directory Removed")
 			}
+
 		}
 
 		if m.Form != nil {
@@ -152,10 +111,10 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			return m, cmd
 		}
-
 	}
 	return m, nil
 }
+
 func (m *model) View() string {
 	UpdateFiles(m)
 
