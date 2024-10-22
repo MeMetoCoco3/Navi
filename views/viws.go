@@ -16,7 +16,7 @@ import (
 
 const maxWidth = 50
 const maxLenPaths = 30
-const maxHeight = 10
+const maxHeight = 20
 
 type model struct {
 	Form     *huh.Form
@@ -87,7 +87,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "Q", "ctrl+c":
 			return m, tea.Quit
 
-		case "g", "G":
+		case "g", "G", "enter":
 			favorites.WriteOnTmp(m.GotoPath)
 			return m, tea.Quit
 			//case "/":
@@ -97,7 +97,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Select.Title(BeautifulCD(m.GotoPath))
 			UpdateFiles(m)
 
-		case "enter", "right":
+		case "right":
 			selectValue := m.Select.GetValue()
 			paths, _ := GetPaths(fmt.Sprintf("%s/%s", m.GotoPath, selectValue))
 
@@ -132,7 +132,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if m.Form != nil {
 			menuModel, cmd := m.Form.Update(msg)
-
+			m.Select.WithHeight(maxHeight)
 			m.Select.Title(BeautifulCD(m.GotoPath))
 			if menu, ok := menuModel.(*huh.Form); ok {
 				m.Form = menu
@@ -187,17 +187,19 @@ func NewModel() model {
 		huhOption := huh.NewOption(newOption, file.Name())
 		huhOptions = append(huhOptions, huhOption)
 	}
-	heightSelect := len(huhOptions)
-	if len(huhOptions) < maxHeight {
-		heightSelect = maxHeight
-	}
+	/*
+		heightSelect := len(huhOptions)
+		if len(huhOptions) < maxHeight {
+			heightSelect = maxHeight
+		}
+	*/
 	selectComponent := huh.NewSelect[string]().Key("folder").
 		Options(huhOptions...).
 		Title(currentDirectory)
 	s := s.NewSelector(huhOptions)
 	return model{
 		// This WithHeight kicked my ass
-		Form:     huh.NewForm(huh.NewGroup(selectComponent).WithHeight(heightSelect).WithTheme(huh.ThemeBase16())),
+		Form:     huh.NewForm(huh.NewGroup(selectComponent).WithHeight(maxHeight).WithTheme(huh.ThemeBase16())),
 		Select:   selectComponent,
 		GotoPath: path,
 		Style:    style,

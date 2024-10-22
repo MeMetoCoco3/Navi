@@ -14,7 +14,12 @@ var gatorCmd = &cobra.Command{
 	Short: "Navigate your file system",
 	Long: `Navigate your file system with Gator command with the arrows 
   of your keyboard. Use 'a' to add folders to favorite list for easy access.
-  Press 'g' to change current directory to the one Gator is in.`,
+ 
+  Controls: 
+    - Use arrows to move in folders or back.
+    - 'a' to add/quit path from favorites.
+    - 'g' or 'enter' to CD to selected path.
+    - 'q' or 'ctrl+c' to quit.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		views.Run()
 	},

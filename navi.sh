@@ -1,18 +1,13 @@
 #!/bin/bash
 
-# SHOULD SET FAVROUTE env variable
-export FAVROUTE=$(pwd)/favorites/favs.json
-
+export FAVROUTE="$NAVIPATH/favorites/favs.json"
 if [ $# -eq 0 ]; then
-  navy
-  exit 0
-fi
-
-navy $1
-
-if [ "$1" = "gator" ]; then
-  OUTPUT=$(</tmp/GatorPath)
-  echo "You are at $OUTPUT"
+  naviGO
+elif [ "$1" == "gator" ] || [ "$1" == "fv" ]; then
+  naviGO "$1" "$2"
+  OUTPUT=$(cat /tmp/GatorPath)
   cd "$OUTPUT"
-  exit 1
+  echo "You are at $OUTPUT"
+else
+  naviGO $#
 fi

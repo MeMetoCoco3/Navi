@@ -15,6 +15,7 @@ type Favorites struct {
 var favRoute string
 
 func init() {
+	// Set on Bashscript
 	favRoute = os.Getenv("FAVROUTE")
 	if favRoute == "" {
 		log.Fatal("(-) CONFIG_PATH environment variable not set")
@@ -84,31 +85,3 @@ func WriteOnTmp(content string) {
 		panic(err)
 	}
 }
-
-/*
-// Gets Paths and returns length of longest
-func MaxLenPaths(paths []fs.DirEntry) int {
-	if len(paths) == 0 {
-		log.Fatalln("Length of paths == 0")
-	}
-
-	firstPath, err := paths[0].Info()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	maxLenSoFar := firstPath.Size()
-	for _, p := range paths {
-
-		lengthP, err := p.Info()
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		if lengthP.Size() > maxLenSoFar {
-			maxLenSoFar = lengthP.Size()
-		}
-	}
-	return int(maxLenSoFar)
-}
-*/

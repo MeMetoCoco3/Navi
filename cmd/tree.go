@@ -20,14 +20,14 @@ var treeCmd = &cobra.Command{
 
 		dir, err := os.Getwd()
 		if err != nil {
-			fmt.Println("PWD ERROR")
+			fmt.Println("(-) PWD ERROR")
 			return
 		}
 
 		files, err := os.ReadDir(dir)
 
 		if err != nil {
-			fmt.Println("ReadDir ERROR")
+			fmt.Println("(-) ReadDir ERROR")
 		}
 		for _, file := range files {
 			if file.IsDir() {

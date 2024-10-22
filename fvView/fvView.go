@@ -51,8 +51,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "Q", "ctrl+c":
 			return m, tea.Quit
 
-		case "g", "G":
-			favorites.WriteOnTmp(m.GotoPath)
+		case "g", "G", "enter", "right":
+			gotoPath := m.Select.GetValue()
+			favorites.WriteOnTmp(gotoPath.(string))
 			return m, tea.Quit
 
 		case "a", "A":

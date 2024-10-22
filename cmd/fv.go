@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"github.com/MeMetoCoco3/navi/fvView"
-
 	"github.com/spf13/cobra"
 )
 
@@ -14,7 +13,14 @@ var fvCmd = &cobra.Command{
 	Use:   "fv",
 	Short: "Show favorites for easy change of directory",
 	Long: `Opens the TUI with limited functionality, just allows to delete from favorites with 'a'
-  and navigate to the folders you have registered. `,
+  and navigate to the folders you have registered. 
+
+  Controls: 
+    - Arrow keys to move.
+    - 'a' to quit path from favorites.
+    - 'g' or 'enter' to move to selected path.
+    - 'q' or 'ctrl+c' to quit.
+  `,
 	Run: func(cmd *cobra.Command, args []string) {
 		fvViews.Run()
 	},
