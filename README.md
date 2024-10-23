@@ -27,14 +27,15 @@ Navi accepts the next commands:
 
 ### Install
 1. Clone the repo in your /home directory.q
-2. Open your .bashrc file, write  this var, and add it to your PATH, so navi.sh can be called anywhere.
+2. Open your *.bashrc* file, write  this var, and add it to your PATH, so navi.sh can be called anywhere.
 ```shell
 export NAVIPATH="$HOME/navi"
 PATH=$PATH:$NAVIPATH
 ```
-3. In .bashrc, also, write this function.
+3. In *.bashrc*, also, write this function.
 ```shell
 navi() {
   source navi.sh
 }
 ```
+4. Done!
