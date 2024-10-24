@@ -9,5 +9,5 @@ elif [ "$1" == "gator" ] || [ "$1" == "fv" ]; then
   cd "$OUTPUT"
   echo "You are at $OUTPUT"
 else
-  naviGO $#
+  naviGO "$1" "$2"
 fi
